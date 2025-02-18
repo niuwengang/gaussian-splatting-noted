@@ -71,6 +71,13 @@ __device__ glm::vec3 computeColorFromSH(int idx, int deg, int max_coeffs, const 
 }
 
 // Forward version of 2D covariance matrix computation
+/**
+mean 均值
+focal_x，focal_y 焦距
+tan_fovx，tan_fovy 相机视场角
+cov3D 三维协方差
+viewmatrix 世界系统到相机系
+ */
 __device__ float3 computeCov2D(const float3& mean, float focal_x, float focal_y, float tan_fovx, float tan_fovy, const float* cov3D, const float* viewmatrix)
 {
 	// The following models the steps outlined by equations 29
@@ -89,12 +96,12 @@ __device__ float3 computeCov2D(const float3& mean, float focal_x, float focal_y,
 	glm::mat3 J = glm::mat3(
 		focal_x / t.z, 0.0f, -(focal_x * t.x) / (t.z * t.z),
 		0.0f, focal_y / t.z, -(focal_y * t.y) / (t.z * t.z),
-		0, 0, 0);
+		0, 0, 0);//近似后的雅可比
 
 	glm::mat3 W = glm::mat3(
 		viewmatrix[0], viewmatrix[4], viewmatrix[8],
 		viewmatrix[1], viewmatrix[5], viewmatrix[9],
-		viewmatrix[2], viewmatrix[6], viewmatrix[10]);
+		viewmatrix[2], viewmatrix[6], viewmatrix[10]);//世界系到相机系
 
 	glm::mat3 T = W * J;
 
@@ -103,9 +110,9 @@ __device__ float3 computeCov2D(const float3& mean, float focal_x, float focal_y,
 		cov3D[1], cov3D[3], cov3D[4],
 		cov3D[2], cov3D[4], cov3D[5]);
 
-	glm::mat3 cov = glm::transpose(T) * glm::transpose(Vrk) * T;
+	glm::mat3 cov = glm::transpose(T) * glm::transpose(Vrk) * T;//投影变换
 
-	return { float(cov[0][0]), float(cov[0][1]), float(cov[1][1]) };
+	return { float(cov[0][0]), float(cov[0][1]), float(cov[1][1]) };//提取二维协方差矩阵 x,y,xy
 }
 
 // Forward method for converting scale and rotation properties of each
@@ -157,7 +164,7 @@ __device__ void computeCov3D(const glm::vec3 scale, float mod, const glm::vec4 r
 // Perform initial steps for each Gaussian prior to rasterization.
 template<int C>
 __global__ void preprocessCUDA(int P, int D, int M,
-	const float* orig_points,
+	const float* orig_points, 
 	const glm::vec3* scales,
 	const float scale_modifier,
 	const glm::vec4* rotations,
