@@ -17,13 +17,19 @@ namespace cg = cooperative_groups;
 
 // Forward method for converting the input spherical harmonics
 // coefficients of each Gaussian to a simple RGB color.
+/*
+deg 球谐函数的阶数一般是3阶
+pos 高斯中心位置
+campos 相机位置
+sh球谐函数系统 16x3
+*/
 __device__ glm::vec3 computeColorFromSH(int idx, int deg, int max_coeffs, const glm::vec3* means, glm::vec3 campos, const float* shs, bool* clamped)
 {
 	// The implementation is loosely based on code for 
 	// "Differentiable Point-Based Radiance Fields for 
 	// Efficient View Synthesis" by Zhang et al. (2022)
 	glm::vec3 pos = means[idx];
-	glm::vec3 dir = pos - campos;
+	glm::vec3 dir = pos - campos;//末减初 相机指向高斯 即关联位置与颜色 (基函数与系数组合)
 	dir = dir / glm::length(dir);
 
 	glm::vec3* sh = ((glm::vec3*)shs) + idx * max_coeffs;
@@ -112,7 +118,7 @@ __device__ float3 computeCov2D(const float3& mean, float focal_x, float focal_y,
 
 	glm::mat3 cov = glm::transpose(T) * glm::transpose(Vrk) * T;//投影变换
 
-	return { float(cov[0][0]), float(cov[0][1]), float(cov[1][1]) };//提取二维协方差矩阵 x,y,xy
+	return { float(cov[0][0]), float(cov[0][1]), float(cov[1][1]) };//提取二维协方差矩阵 sigma x,sigma x y,sigma x_y
 }
 
 // Forward method for converting scale and rotation properties of each
