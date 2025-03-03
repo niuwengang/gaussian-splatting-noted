@@ -1,1 +1,0 @@
-Namespace(data_device='cuda', depths='', eval=False, images='images', model_path='./output/953cbca6-7', resolution=-1, sh_degree=3, source_path='/home/g/workspace/tandt_db/tandt/truck', train_test_exp=False, white_background=False)
