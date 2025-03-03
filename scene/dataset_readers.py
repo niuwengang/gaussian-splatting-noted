@@ -24,27 +24,28 @@ from utils.sh_utils import SH2RGB
 from scene.gaussian_model import BasicPointCloud
 
 class CameraInfo(NamedTuple):
-    uid: int
-    R: np.array
+    uid: int #相机序号
+    R: np.array #
     T: np.array
-    FovY: np.array
+    FovY: np.array #图像视场角
     FovX: np.array
-    depth_params: dict
-    image_path: str
+    depth_params: dict #深度信息
+    image_path: str 
     image_name: str
-    depth_path: str
-    width: int
-    height: int
+    depth_path: str #深度图路径
+    width: int #图像宽
+    height: int #图像高
     is_test: bool
 
 class SceneInfo(NamedTuple):
-    point_cloud: BasicPointCloud
-    train_cameras: list
-    test_cameras: list
-    nerf_normalization: dict
-    ply_path: str
-    is_nerf_synthetic: bool
+    point_cloud: BasicPointCloud #点云
+    train_cameras: list #训练相机序列
+    test_cameras: list #测试相机序列
+    nerf_normalization: dict #相机中心化
+    ply_path: str #高斯点路径
+    is_nerf_synthetic: bool #是否是blender场景
 
+#相机中心化，获取场景半径 from: nerf++
 def getNerfppNorm(cam_info):
     def get_center_and_diag(cam_centers):
         cam_centers = np.hstack(cam_centers)
@@ -117,6 +118,7 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, depths_params, images_fold
     sys.stdout.write('\n')
     return cam_infos
 
+#读取点云
 def fetchPly(path):
     plydata = PlyData.read(path)
     vertices = plydata['vertex']
@@ -125,6 +127,7 @@ def fetchPly(path):
     normals = np.vstack([vertices['nx'], vertices['ny'], vertices['nz']]).T
     return BasicPointCloud(points=positions, colors=colors, normals=normals)
 
+#保存点云
 def storePly(path, xyz, rgb):
     # Define the dtype for the structured array
     dtype = [('x', 'f4'), ('y', 'f4'), ('z', 'f4'),
@@ -309,6 +312,7 @@ def readNerfSyntheticInfo(path, white_background, depths, eval, extension=".png"
                            is_nerf_synthetic=True)
     return scene_info
 
+#支持两种数据集
 sceneLoadTypeCallbacks = {
     "Colmap": readColmapSceneInfo,
     "Blender" : readNerfSyntheticInfo

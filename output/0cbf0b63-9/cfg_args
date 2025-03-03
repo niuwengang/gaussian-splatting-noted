@@ -1,0 +1,1 @@
+Namespace(data_device='cuda', depths='', eval=False, images='images', model_path='./output/0cbf0b63-9', resolution=-1, sh_degree=3, source_path='/home/g/下载/tandt_db/db/playroom', train_test_exp=False, white_background=False)
